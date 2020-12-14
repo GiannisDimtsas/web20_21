@@ -64,7 +64,6 @@ let user = mongoose.model('User', User);
 let request = mongoose.model('Request', Request);
 let response = mongoose.model('Response', Response);
 
-
 module.exports = {
     User: user,
     Request: request,
