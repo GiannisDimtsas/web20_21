@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const User = require("../models/models");
+const {User} = require("../models/models");
 //const adminRouter = require("express").Router();
 
 //User Routes
@@ -9,38 +9,44 @@ const User = require("../models/models");
 //POST register user
 router.post("/register", async (req, res) => {
     try {
-        const { email, password, password2, displayName } = req.body;
-
-        //validate
-
-        if (!email || !password || !password2)
-            return res.status(400).json({msg: "Please enter all fields"});
-        if (password.length < 8)
-            return res.status(400).json({msg: "The password needs to be at least 8 characters long."});
-        if (password !== password2)
-            return res.status(400).json({msg: "Enter the same password."});
-
-        const existingUser = await User.findOne({email:email})
-        if (existingUser)
-            return res.status(400).json({msg: "An account with this email already exists."});
-            
-        if (!displayName) displayName = email; 
-
-        const salt = await bcrypt.genSalt();
-        const passwordHash = await bcrypt.hash(password,salt);
-
-        let newUser = new User({
-            email,
-            password: passwordHash,
-            displayName,
-            type: 'USER',
-        });
-        const savedUser = await newUser.save();
-         res.json(savedUser);
+      let { email, password, password2, displayName } = req.body;
+  
+      // validate
+  
+      if (!email || !password || !password2)
+        return res.status(400).json({ msg: "Not all fields have been entered." });
+      if (password.length < 5)
+        return res
+          .status(400)
+          .json({ msg: "The password needs to be at least 5 characters long." });
+      if (password !== password2)
+        return res
+          .status(400)
+          .json({ msg: "Enter the same password twice for verification." });
+  
+      const existingUser = await User.findOne({ email: email });
+      if (existingUser)
+        return res
+          .status(400)
+          .json({ msg: "An account with this email already exists." });
+  
+      if (!displayName) displayName = email;
+  
+      const salt = await bcrypt.genSalt();
+      const passwordHash = await bcrypt.hash(password, salt);
+  
+      const newUser = new User({
+        email,
+        password: passwordHash,
+        displayName,
+        type: 'USER'
+      });
+      const savedUser = await newUser.save();
+      res.json(savedUser);
     } catch (err) {
-        res.status(500).json(err);
+      res.status(500).json({ error: err.message });
     }
-});
+  });
 //-----------------------------------------------------------------------------------------------------
 
 //POST login user
@@ -94,10 +100,6 @@ router.post("/change-username", async (req, res) =>{
             return res
                 .status(400).json({msg: "No account with this email has been registered"});
 
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch)
-            return res
-                .status(400).json({msg: "Invalid credentials."});  
          
         user.displayName = req.body.displayName;
         user.save();
