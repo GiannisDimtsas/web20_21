@@ -2,7 +2,18 @@ const router = require("express").Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const {User} = require("../models/models");
+const auth = require("../middleware/auth");
+const validateRegister = require("../validator/registerValidator");
+const validateLogin = require("../validator/loginValidator");
 //const adminRouter = require("express").Router();
+
+function authAdmin(req, res, next) {
+    if (req.type !== 'ADMIN') {
+        res.json('Unauthorized');
+        res.status(400);
+    }
+    next();
+}
 
 //User Routes
 
@@ -13,16 +24,10 @@ router.post("/register", async (req, res) => {
   
       // validate
   
-      if (!email || !password || !password2)
-        return res.status(400).json({ msg: "Not all fields have been entered." });
-      if (password.length < 5)
-        return res
-          .status(400)
-          .json({ msg: "The password needs to be at least 5 characters long." });
-      if (password !== password2)
-        return res
-          .status(400)
-          .json({ msg: "Enter the same password twice for verification." });
+      const { errors, isValid } = validateRegister(req.body);
+      if (!isValid) {
+        return res.status(400).json(errors);
+      }
   
       const existingUser = await User.findOne({ email: email });
       if (existingUser)
@@ -50,41 +55,38 @@ router.post("/register", async (req, res) => {
 //-----------------------------------------------------------------------------------------------------
 
 //POST login user
-router.post("/login", async (req,res) => {
-    try{
-        const { email, password } = req.body;
-
-        //valdiate
-        if (!email || !password)
-            return res
-                .status(400).json({msg: "Not all fields have been entered"});
-
-        const user = await User.findOne({email: email});
-        if (!user)
-            return res
-                .status(400).json({msg: "No account with this email has been registered"});
-
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch)
-            return res
-                .status(400).json({msg: "Invalid credentials."});
-
-        
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-        res.json({
-            token,
-            user:{
-                id:user._id,
-                displayName: user.displayName,
-                email: user.email
-            }
-        })
-        
-
-    } catch(err) {
-        res.status(500).json(err);
+router.post("/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+  
+      // validate
+      const { errors, isValid } = validateLogin(req.body);
+      if (!isValid) {
+        return res.status(400).json(errors);
+      }
+  
+      const user = await User.findOne({ email: email });
+      if (!user)
+        return res
+          .status(400)
+          .json({ msg: "No account with this email has been registered." });
+  
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) return res.status(400).json({ msg: "Invalid credentials." });
+  
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+      res.json({
+        token,
+        user: {
+          id: user._id,
+          displayName: user.displayName,
+          type: user.type
+        },
+      });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
     }
-});
+  });
 //--------------------------------------------------------------------------------------
 
 //POST change username 
@@ -153,6 +155,15 @@ router.post("/change-password", async (req, res) =>{
         res.status(500).json(err);
     }
 });
+
+router.delete("/delete", auth, async (req, res) => {
+    try {
+      const deletedUser = await User.findByIdAndDelete(req.user);
+      res.json(deletedUser);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
 //-------------------------------------------------------------------------------------------------------
 
 //POST upload HAR files
