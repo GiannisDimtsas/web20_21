@@ -30,4 +30,4 @@ mongoose.connect(
 
 //set up  routes
 const route = require("./routes/routes");
-app.use("/users", route);
+app.use("/", route);
