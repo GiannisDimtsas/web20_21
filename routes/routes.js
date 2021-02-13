@@ -154,10 +154,10 @@ router.post("/user/profile-management/change-password", async (req, res) =>{
 //POST upload HAR files
   router.post("/user/upload", async (req, res, next) => {
     let objects = new Objects(req.body);
-    let lastUpload =  Date.now();
-    objects = await objects.save();
+    let lastUpload =  Date.now(); //Saves when the last upload did happen
+    objects = await objects.save(); //creates a new object and saves it in MongoDB
     
-    await User.updateOne({email: req.body.email}, {
+    await User.updateOne({email: req.body.email}, { //Looking for the email-matched user and update it's objects field
       $push: {
         "objects.features": {
             $each: [req.body.features]
@@ -175,8 +175,8 @@ router.post("/user/profile-management/change-password", async (req, res) =>{
       User.aggregate([
         
         {$match: {email: req.body.email}},
-        {$unwind: '$objects.features'},
-        {$unwind: '$objects.features.entries'},
+        {$unwind: '$objects.features'},           //deconstructs features
+        {$unwind: '$objects.features.entries'},   //and entries array in order to get data
         {
           $project: {
             _id: 0,
@@ -199,8 +199,8 @@ router.post("/user/profile-management/change-password", async (req, res) =>{
               ip[i] = res1[i].ip
             } 
             let data;
-            axios.get(`http://ip-api.com/json/${ip[0]}`)
-            .then((response)=>{
+            axios.get(`http://ip-api.com/json/${ip[0]}`) //Sends a get request to ip-api and receives a json response with all 
+            .then((response)=>{                          // the information needed about Lat, Lon, city, provider etc.
               lat[0] = response.data.lat
               lon[0] = response.data.lon
               data = response.data
@@ -231,12 +231,12 @@ router.get("/user/profile-management/last-upload",function(req, res) {
 
 //GET get number of users
 router.get("/admin/basic-info", function(req, res){
-  User.find({type: "USER"}).countDocuments().exec((err,res1) =>{
-    let count = res1
+  User.find({type: "USER"}).countDocuments().exec((err,res1) =>{ //Finds all documents which have the "USER" attribute in their type 
+    let count = res1                                             // and count them
     res.json(count)
   }) 
 });
-router.get("/admin/basic-info/get-methods",function(req, res){
+router.get("/admin/basic-info/get-methods",function(req, res){  // same for "GET" methods
   let countGetMethods;
   Object.find({"features.request.method": "GET"}).countDocuments().exec((err,res1) =>{
     countGetMethods = res1
@@ -244,7 +244,7 @@ router.get("/admin/basic-info/get-methods",function(req, res){
   })
 })
 
-router.get("/admin/basic-info/post-methods",function(req, res){
+router.get("/admin/basic-info/post-methods",function(req, res){ // Same for "POST" methods
   let countPostMethods;
   Object.find({"features.request.method": "POST"}).countDocuments().exec((err,res1) =>{
     countPostMethods = res1
@@ -252,7 +252,7 @@ router.get("/admin/basic-info/post-methods",function(req, res){
   })
 })
 
-router.get("/admin/basic-info/get-status",function(req, res){
+router.get("/admin/basic-info/get-status",function(req, res){ // Finds the different status messages
   let countStatus;
   Object.aggregate([
     {$unwind: "$features"},
@@ -272,8 +272,8 @@ router.get("/admin/basic-info/get-status",function(req, res){
   })
 })
 
-router.get("/admin/basic-info/domains", function(req, res){
-  Object.distinct("features.request.url").countDocuments().exec((err,res1) => {
+router.get("/admin/basic-info/domains", function(req, res){ // Finds the unique Domains
+  Object.distinct("features.request.url").countDocuments().exec((err,res1) => { //Distinct helps for the uniqueness
     if (err) {
       res.send(err);
       res.status(400);
@@ -283,7 +283,7 @@ router.get("/admin/basic-info/domains", function(req, res){
   })
 })
 
-router.get("/admin/response-time-analyzation/", function(req,res){
+router.get("/admin/response-time-analyzation/", function(req,res){ //TODO
   Object.aggregate([
     {$unwind:"$features"},
     {$unwind:"$features.timings"},

@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const {Schema} = require("mongoose");
 
+//Object model
+
 const Timings = new Schema({
     wait:{type:Number}
 });
@@ -50,7 +52,9 @@ const Objects = new Schema({
         type: [Object]
     }
 })
+//---------------------------------------------------------------------------------
 
+//User model
 const User = new Schema({
     email: {
         type: String,
@@ -75,6 +79,8 @@ const User = new Schema({
     },
     objects: Objects
 });
+
+//Connects models with the MongoDB
 
 let user = mongoose.model('User', User);
 let entries = mongoose.model('Entries',Entries);

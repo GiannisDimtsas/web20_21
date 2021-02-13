@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import L from 'leaflet'
 import HeatmapOverlay from 'leaflet-heatmap'
+
+//This heatmap is used in Users' components.
   
 class Heatmap extends Component {
 
@@ -23,8 +25,8 @@ class Heatmap extends Component {
   }
 
   componentDidMount () {
-    this.setState(this.state.testData={
-      max:8,
+    this.setState(this.state.testData={   //These Data are manually uploaded in our system in order to avoid the ip-api problems
+      max:8,                              //Max defines the deepness of the Heatmap. It is displayed as "count" in data array.
       data:[
             {lat: 40.183800, lng:21.190010, count: 8}, 
             {lat: 47.75, lng:-3.55, count: 4},
@@ -41,13 +43,13 @@ class Heatmap extends Component {
       )
     const map = L.map('map').setView(this.position1, 5.5)
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { //Creates the map using OpenStreetMap
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map)
 
-    this.heatmapLayer = new HeatmapOverlay(this.cfg).addTo(map)
+    this.heatmapLayer = new HeatmapOverlay(this.cfg).addTo(map) 
     
-    this.heatmapLayer.setData(this.state.testData)
+    this.heatmapLayer.setData(this.state.testData) //Displays the data in a Heatmap
     console.log(this.state.testData)
   }
 

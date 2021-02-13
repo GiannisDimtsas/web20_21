@@ -19,6 +19,7 @@ class basicInfo extends Component {
     }
 
     componentDidMount() {
+        //Connects routes with component
         Api.numberOfTotalUsers().then(res => {
             console.log(res);
             this.setState({numberOfTotalUsers:res.data})

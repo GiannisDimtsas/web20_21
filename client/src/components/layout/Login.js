@@ -4,8 +4,6 @@ import { Button, Form } from 'react-bootstrap'
 import { NavLink } from 'react-router-dom'
 import Api from '../../auth/Api'
 
-
-
 class Login extends Component {
     constructor(props){
         super(props)
