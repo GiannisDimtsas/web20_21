@@ -1,8 +1,6 @@
 import React, { Component } from 'react'
 import L from 'leaflet'
 import HeatmapOverlay from 'leaflet-heatmap'
-
-  
   
 class Heatmap extends Component {
 
