@@ -13,6 +13,7 @@ import Management from './components/user/Management';
 import Visualizations from './components/user/Visualizations';
 import basicInfo from './components/admin/basicInfo';
 import AdminVisualizations from './components/admin/AdminVisualizations';
+import ResponseTimeAnalyzation from './components/admin/ResponseTimeAnalyzation'
 
 import "./App.css";
 
@@ -30,8 +31,7 @@ function App () {
               <Route exact path='/user/visualizations' component={Visualizations} />
               <Route exact path='/admin/basic-info' component={basicInfo} />
               <Route exact path='/admin/visualizations' component={AdminVisualizations} />
-             
-
+              <Route exact path='/admin/response-time-analyzation' component={ResponseTimeAnalyzation} />
             </div>
         </Router>          
     )

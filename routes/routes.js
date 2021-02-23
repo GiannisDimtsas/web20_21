@@ -22,7 +22,7 @@ router.post("/register", async (req, res) => {
         return res.status(400).json(errors);
       }
   
-      const existingUser = await User.findOne({ email: email });
+      const existingUser = await User.findOne({ email: email });  //Check if there's already existing user
       if (existingUser)
         return res
           .status(400)
@@ -170,8 +170,8 @@ router.post("/user/profile-management/change-password", async (req, res) =>{
 // GET lat and lon from a HAR file
   router.get("/user/visualizations/get-lat-lon", function (req, res) {
     let ip = [];
-    let lat = [];
-    let lon = [];
+    var lat = [];
+    var lon = [];
       User.aggregate([
         
         {$match: {email: req.body.email}},
@@ -199,15 +199,16 @@ router.post("/user/profile-management/change-password", async (req, res) =>{
               ip[i] = res1[i].ip
             } 
             let data;
-            axios.get(`http://ip-api.com/json/${ip[0]}`) //Sends a get request to ip-api and receives a json response with all 
-            .then((response)=>{                          // the information needed about Lat, Lon, city, provider etc.
-              lat[0] = response.data.lat
-              lon[0] = response.data.lon
-              data = response.data
-              console.log(lat,lon)
-            }) 
-              res.json(data)  
-                       
+            for(i=0; i<res1.length; i++){
+              axios.get(`http://ip-api.com/json/${ip[i]}`) //Sends a get request to ip-api and receives a json response with all 
+              .then((response)=>{                          // the information needed about Lat, Lon, city, provider etc.
+                lat[i] = response.data.lat
+                lon[i] = response.data.lon
+                data = response.data
+                console.log(lat,lon)
+              })
+            }
+              //res.json(response.data)              
         }
       })  
   })
@@ -284,6 +285,8 @@ router.get("/admin/basic-info/domains", function(req, res){ // Finds the unique 
 })
 
 router.get("/admin/response-time-analyzation/", function(req,res){ //TODO
+  wait = [];
+  let wait_mean;
   Object.aggregate([
     {$unwind:"$features"},
     {$unwind:"$features.timings"},
@@ -298,10 +301,12 @@ router.get("/admin/response-time-analyzation/", function(req,res){ //TODO
       res.send(err);
       res.status(400);
     }else{
+      wait = 0;
       for(i=0; i<res1.length; i++){
-        wait = res1[i].wait
+        wait = res1[i].wait + wait;
       }
-      res.json(wait)
+      wait_mean = wait/res1.length
+      res.json(wait_mean)
     }
   })
 })

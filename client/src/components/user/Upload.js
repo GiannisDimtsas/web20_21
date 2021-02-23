@@ -36,7 +36,7 @@ class Upload extends Component {
     
     onClick (e) {
         e.preventDefault()
-        Api.uploadObject(this.state.result).then(r => console.log('OK'))
+        Api.uploadObject(this.state.result).then(r => console.log('file uploaded'))
     }
 
 
@@ -44,12 +44,15 @@ class Upload extends Component {
     render() {
         return(
             <div className="center">
-                <Heatmap />
+                <Button as={Link} to={`/user`}>back</Button>
                 <form>
-                    <h6>Upload your file</h6>
+                    <h3>Upload your file</h3>
+                    <p>You can upload your data with safety.</p>
+                    <hr />
+                    <h3>Choose file</h3>
+                    <p>Don't upload data over 300mb.</p>
                     <input id="file" type="file" name="selectedFile" onChange={this.onChange} />    
-                    <button type="submit" className="btn btn-success col-md-auto" onClick={this.onClick}>Upload</button>                
-                    <Button as={Link} to={`/user`}>back</Button>
+                    <button type="submit" className="btn btn-success col-md-auto" onClick={this.onClick}>Upload</button>   
                 </form>
             </div>
         )

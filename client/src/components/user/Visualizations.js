@@ -2,8 +2,9 @@ import Heatmap from '../heatmap/Heatmap'
 import React, { Component } from 'react'
 import {Button} from 'react-bootstrap'
 import { Link } from 'react-router-dom'
-import jwt_decode from "jwt-decode";
+import Api from "./Api"
 const axios = require('axios')
+
 
 class Visualizations extends Component {
     
@@ -13,7 +14,7 @@ class Visualizations extends Component {
         this.state = {
            lat : '',
            lon : '',
-           //data:{},
+           data:{},
            token: ''
         };
     }
@@ -21,13 +22,13 @@ class Visualizations extends Component {
     
     componentDidMount() {
            
-            /*Api.getLatLon().then(res => {
+            Api.getLatLon().then(res => {
                 console.log(res);
                 this.setState({
                     lat:res.data,
                     lon: res.data
                 })
-            });*/
+            });
             
         }
     componentDidUpdate(prevProps, prevState, snapshot){
@@ -41,7 +42,7 @@ class Visualizations extends Component {
             <div className="center">
                 <h3>Visualizations</h3>
                 <Button as={Link} to={`/user`}>back</Button>
-                <Heatmap data = {this.state.data}/>
+                <Heatmap />
             </div>
         )
     }   
