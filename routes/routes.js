@@ -153,16 +153,16 @@ router.post("/user/profile-management/change-password", async (req, res) =>{
 
 //POST upload HAR files
   router.post("/user/upload", async (req, res, next) => {
-      let objects =  new Objects(req.body);
+      let objects = new Objects(req.body.data);
       
       await objects.save(); //creates a new object and saves it in MongoDB
       let lastUpload =  Date.now(); //Saves when the last upload did happen
-       User.updateOne(
+      await User.updateOne(
         {email: req.body.email}, //Looking for the email-matched user and update it's objects field
         { 
           $push: {
             "objects": {
-                $each: [req.body]
+                $each: [req.body.data]
             }
         },
         lastUpload: lastUpload
@@ -170,21 +170,17 @@ router.post("/user/profile-management/change-password", async (req, res) =>{
   });
     
 // GET lat and lon from a HAR file
-  router.get("/user/visualizations/get-lat-lon", function (req, res) {
+  router.get("/user/visualizations/get-lat-lon", async (req, res)  => {
     let ip = [];
     var lat = [];
     var lon = [];
-      User.aggregate([
+    await User.aggregate([
         
         {$match: {email: req.body.email}},
+        {$unwind: '$objects'},
         {$unwind: '$objects.features'},           //deconstructs features
         {$unwind: '$objects.features.entries'},   //and entries array in order to get data
-        {
-          $project: {
-            _id: 0,
-            "objects.features.entries.serverIPAddress":1
-          }
-        },
+
         {
           $project: {
             _id: 0,
@@ -196,10 +192,11 @@ router.post("/user/profile-management/change-password", async (req, res) =>{
             res.send(err);
             res.status(400);
           }else {
-
+            
             for(i=0; i<res1.length; i++){   
               ip[i] = res1[i].ip
             } 
+            res.json(res1)
             let data;
             for(i=0; i<res1.length; i++){
               axios.get(`http://ip-api.com/json/${ip[i]}`) //Sends a get request to ip-api and receives a json response with all 
@@ -215,7 +212,7 @@ router.post("/user/profile-management/change-password", async (req, res) =>{
       })  
   })
 
-router.get("/user/profile-management/last-upload",function(req, res) {
+router.get("/user/profile-management/last-upload", function (req, res)  {
   User.aggregate([
     {$match: {email: req.body.email}},
     {
@@ -226,7 +223,7 @@ router.get("/user/profile-management/last-upload",function(req, res) {
     }
   ]).exec((err,res1) =>{
     let lastUpload = res1
-    res.json(lastUpload)
+    res.json(res1)
   })
 })
 
