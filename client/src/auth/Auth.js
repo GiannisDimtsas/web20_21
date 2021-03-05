@@ -16,7 +16,8 @@ export default class Auth {
           token = data.token
 
           localStorage.setItem("jwtToken", token);
-
+          localStorage.setItem('email', email);
+          
           setAuthToken(token);
           const decoded = jwt_decode(token);
           console.log(decoded)

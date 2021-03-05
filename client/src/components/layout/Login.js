@@ -12,13 +12,13 @@ class Login extends Component {
             password: ''
         };
     }
+    
 
     onChange = (e) => { //function for handling input values
         const target = e.target
         const value = target.value
         const name = target.name
         const state = this.state
-
         state[name] = value
         this.setState(state)
     }
@@ -33,7 +33,8 @@ class Login extends Component {
             this.props.history.push('/admin')
         } else if(data.user.type==='USER'){
             this.props.history.push('/user')
-            console.log(data.token)
+            localStorage.setItem('email',email)
+            
         }else{
             this.props.history.push('/')
         }

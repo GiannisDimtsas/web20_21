@@ -18,7 +18,7 @@ function User () {
                     <Button as={Link} to={`${url}/upload-object`}>Upload</Button>
                     <Button as={Link} to={`${url}/profile-management`}>Profile management</Button>
                     <Button as={Link} to={`${url}/visualizations`}>Visualizations</Button>
-                    <Button>Logout</Button>
+                    <Button as={Link} to={`/`}>Logout</Button>
                 </ButtonGroup>
             </Navbar.Collapse>
         </div>

@@ -1,10 +1,10 @@
-import Heatmap from '../heatmap/Heatmap'
 import React, { Component } from 'react'
 import Api from './Api'
 import {Button} from 'react-bootstrap'
 import { Link } from 'react-router-dom'
+import {Preprocessor} from './Preprocessor'
+
 const User = require("../../models/models")
-const fs = require('fs')
 
 let map = null
 
@@ -14,45 +14,49 @@ class Upload extends Component {
         super(props)
         this.state = {
             file: '',
+            data: ''
+           
         }
-        this.onClick = this.onClick.bind(this)
+        this.onFormSubmit = this.onFormSubmit.bind(this)
         this.onChange = this.onChange.bind(this)
-        this.fileReader = new FileReader()
-        this.fileReader.onLoad = e => {
-            let result = e.target.result
-            let user = User.findOne({displayName: user.displayName})
-            let email = user.email;
-            fs.writeFile(result,JSON.stringify(email))
-        }
-
+        this.fileReader = new FileReader();
+        this.fileReader.onload = e =>{
+            let preprocessor = new Preprocessor();
+            let data = preprocessor.parse(JSON.parse(e.target.result));
+            this.setState({data:data})
+            console.log(this.state.data)
+        }   
     }
 
-
+ 
     onChange (e) {
         this.setState({ file: e.target.files[0] }, () => {
           this.fileReader.readAsText(this.state.file)
         })
       }
     
-    onClick (e) {
+    onFormSubmit (e) {
         e.preventDefault()
-        Api.uploadObject(this.state.result).then(r => console.log('file uploaded'))
+        let email  = localStorage.getItem('email')      
+        Api.uploadObject(this.state.data,email).then(r => console.log('file uploaded'))
     }
 
+    componentDidMount(){
 
-
+    }
     render() {
         return(
             <div className="center">
+                
                 <Button as={Link} to={`/user`}>back</Button>
-                <form>
+                <form onSubmit={this.onFormSubmit}>
                     <h3>Upload your file</h3>
                     <p>You can upload your data with safety.</p>
                     <hr />
                     <h3>Choose file</h3>
-                    <p>Don't upload data over 300mb.</p>
+                    <p>Don't upload data over 50mb.</p>
                     <input id="file" type="file" name="selectedFile" onChange={this.onChange} />    
-                    <button type="submit" className="btn btn-success col-md-auto" onClick={this.onClick}>Upload</button>   
+                    <button type="submit" className="btn btn-success col-md-auto">Upload</button>   
                 </form>
             </div>
         )

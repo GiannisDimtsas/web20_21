@@ -2,13 +2,14 @@ const router = require("express").Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const {User, Objects, Object} = require("../client/src/models/models");
-const auth = require("../middleware/auth");
 const validateRegister = require("../validator/registerValidator");
 const validateLogin = require("../validator/loginValidator");
 const { json } = require("body-parser");
 const axios = require("axios");
-
+const auths = require('../middleware/auths')
 //User Routes
+
+
 
 //POST register a new user
 router.post("/register", async (req, res) => {
@@ -68,7 +69,6 @@ router.post("/login", async (req, res) => {
   
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) return res.status(400).json({ msg: "Invalid credentials." });
-  
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET); // create a unique token for the user
       res.json({
         token,
@@ -153,18 +153,20 @@ router.post("/user/profile-management/change-password", async (req, res) =>{
 
 //POST upload HAR files
   router.post("/user/upload", async (req, res, next) => {
-    let objects = new Objects(req.body);
-    let lastUpload =  Date.now(); //Saves when the last upload did happen
-    objects = await objects.save(); //creates a new object and saves it in MongoDB
-    
-    await User.updateOne({email: req.body.email}, { //Looking for the email-matched user and update it's objects field
-      $push: {
-        "objects.features": {
-            $each: [req.body.features]
-        }
-      },
-      lastUpload: lastUpload
-    })  
+      let objects =  new Objects(req.body);
+      
+      await objects.save(); //creates a new object and saves it in MongoDB
+      let lastUpload =  Date.now(); //Saves when the last upload did happen
+       User.updateOne(
+        {email: req.body.email}, //Looking for the email-matched user and update it's objects field
+        { 
+          $push: {
+            "objects": {
+                $each: [req.body]
+            }
+        },
+        lastUpload: lastUpload
+      })       
   });
     
 // GET lat and lon from a HAR file
@@ -238,28 +240,53 @@ router.get("/admin/basic-info", function(req, res){
   }) 
 });
 router.get("/admin/basic-info/get-methods",function(req, res){  // same for "GET" methods
-  let countGetMethods;
-  Object.find({"features.request.method": "GET"}).countDocuments().exec((err,res1) =>{
-    countGetMethods = res1
-    res.json(countGetMethods)
+  Object.aggregate([
+    {$unwind:'$features'},
+    {$unwind:'$features.entries'},
+    {
+      $group:{
+        _id:  
+        '$features.entries.request.method',
+        count:{$sum:1}
+      }
+    }
+  ]).exec((err,res1) =>{
+    if (err) {
+      res.send(err);
+      res.status(400);
+    }else {
+      res.json(res1);
+    }   
   })
 })
 
 router.get("/admin/basic-info/post-methods",function(req, res){ // Same for "POST" methods
-  let countPostMethods;
-  Object.find({"features.request.method": "POST"}).countDocuments().exec((err,res1) =>{
-    countPostMethods = res1
-    res.json(countPostMethods)
-  })
+Object.aggregate([
+  {$unwind:'$features'},
+  {$unwind:'$features.entries'},
+  {
+    $group:{
+      _id: '$features.entries.request.method',
+      count:{$sum:1}
+    }
+  }
+]).exec((err,res1) =>{
+  if (err) {
+    res.send(err);
+    res.status(400);
+  }else {
+    res.json(res1);
+  }   
+})
 })
 
 router.get("/admin/basic-info/get-status",function(req, res){ // Finds the different status messages
-  let countStatus;
   Object.aggregate([
     {$unwind: "$features"},
+    {$unwind: '$features.entries'},
     {
       $group: {
-        _id: "$features.response.status",
+        _id: "$features.entries.response.status",
         count: {$sum:1}
       }
     }
@@ -274,7 +301,16 @@ router.get("/admin/basic-info/get-status",function(req, res){ // Finds the diffe
 })
 
 router.get("/admin/basic-info/domains", function(req, res){ // Finds the unique Domains
-  Object.distinct("features.request.url").countDocuments().exec((err,res1) => { //Distinct helps for the uniqueness
+  Object.aggregate([
+    {$unwind: "$features"},
+    {$unwind: '$features.entries'},
+    {
+      $group: {
+        _id: "$features.entries.request.url",
+        count: {$sum:1}
+      }
+    }
+  ]).exec((err,res1) => {
     if (err) {
       res.send(err);
       res.status(400);
@@ -289,11 +325,11 @@ router.get("/admin/response-time-analyzation/", function(req,res){ //TODO
   let wait_mean;
   Object.aggregate([
     {$unwind:"$features"},
-    {$unwind:"$features.timings"},
+    {$unwind:"$features.entries"},
     {
       $project:{
         _id:0,
-        wait:"$features.timings.wait"  
+        wait:"$features.entries.timings.wait"  
       }
     }
   ]).exec((err,res1) => {

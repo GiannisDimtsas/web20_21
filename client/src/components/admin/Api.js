@@ -8,6 +8,9 @@ let instance = axios.create({
     },
 })
 
+
+// This is the Admin's API. It connects routes with the admin's components in order to get data from the DB.
+
 class Api {
     numberOfTotalUsers = () => {
         return instance.get("/admin/basic-info")
@@ -27,6 +30,10 @@ class Api {
 
     countUniqueDomains = () => {
         return instance.get('/admin/basic-info/domains')
+    }
+
+    waitTimeMean = () =>{
+        return instance.get('/admin/response-time-analyzation')
     }
 }
 

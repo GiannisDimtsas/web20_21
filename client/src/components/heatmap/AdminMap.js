@@ -24,24 +24,24 @@ class AdminMap extends Component {
     componentDidMount () {
       
         
-        var data = [
-            [53.320108, -6.442064],
-            [50.469333, 3.865472],
-            [60.536578, 27.117003],
-            [53.425659, 6.859352],
-            [55.558194, 9.655778],
-            [33.064111, -80.043361],
-            [41.221583, -95.863867],
-            [33.749733, -84.584814],
-            [34.913444, -85.748083],
-            [36.241139, -95.330061],
-            [-33.358472, -70.697333]
+        var data1 = [ 
+            [53.320108, -6.442064, 3],          ///3rd dimension is the weight
+            [50.469333, 3.865472, 4],
+            [60.536578, 27.117003,1],
+            [53.425659, 6.859352, 4],
+            [55.558194, 9.655778, 5],
+            [33.064111, -80.043361, 2],
+            [41.221583, -95.863867, 4],
+            [33.749733, -84.584814, 3],
+            [34.913444, -85.748083, 6],
+            [36.241139, -95.330061, 3],
+            [-33.358472, -70.697333, 2]
         ]
-        var userLatLng = [
+        var userLatLng1 = [
             [38.243303498538204,21.733360290527344]
         ];
-        
-        
+
+     
 
       const map = L.map('map').setView(this.position1, 5.5)
   
@@ -52,12 +52,14 @@ class AdminMap extends Component {
 
     
       let marker;
-      for (var i = 0; i < data.length; i++) {
-        marker = new L.marker([data[i][0],data[i][1]]).addTo(map);
+      for (var i = 0; i < data1.length; i++) {
+        marker = new L.marker([data1[i][0],data1[i][1]]).addTo(map);
         }
-      for(i=0;i<data.length; i++){
-        var polyline = L.polyline([data[i],userLatLng[0]], {color: 'red'}).addTo(map);  
+      for(i=0;i<data1.length; i++){
+        var polyline = L.polyline([data1[i],userLatLng1[0]], {color: 'red' }).addTo(map);  
       }  
+
+   
       
     }
   

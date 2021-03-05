@@ -10,9 +10,11 @@ let instance = axios.create({
   },
 })
 
+// This is the Users' API. This API connects the routes with the components in order to get or post data.
+
 class Api {
-  uploadObject = (data) => {    
-    return instance.post('/user/upload', data)
+  uploadObject = (data,email) => { 
+    return instance.post('/user/upload',data,email)
   }
 
   getLatLon = () => {

@@ -61,7 +61,7 @@ class Management extends Component {
         return (
             <div className="Management">
                 <div className="center">
-                    <h1>Mange your profile</h1>   
+                    <h1>Manage your profile</h1>   
                     <h4>Change your username or password</h4>
                     <Button as={Link} to={`/user`}>back</Button>
                 </div>     

@@ -2,45 +2,72 @@ const mongoose = require("mongoose");
 const {Schema} = require("mongoose");
 
 //Object model
-
-const Timings = new Schema({
-    wait:{type:Number}
+const Headers = new Schema({
+    contentType:{
+        name: {type:String, enum:['Content-Type','content-type']},
+        value:{type:String}
+    },
+    cacheControl:{
+        name: {type:String, enum:['Cache-Control','cache-control']},
+        value:{type:String}
+    },
+    pragma:{
+        name: {type:String, enum:['Pragma','pragma']},
+        value:{type:String}
+    },
+    expires:{
+        name: {type:String, enum:['Expires','expires']},
+        value:{type:Date}
+    },
+    lastModified:{
+        name: {type:String, enum:['Last-Modified','last-modified']},
+        value:{type:Date}
+    },
+    host:{
+        name: {type:String, enum:['Host']},
+        value:{type:String}
+    },
 });
 
 const Entries = new Schema({
-    startedDateTime:{type:Date},
-    timings:{type:Timings},
-    serverIPAddress: {type: String}
+    request:{
+        method:{
+            type:String, 
+            enum:['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+        },
+        url:{
+            type:String
+        },
+        headers:[Headers]
+    },
+    response:{
+        status:{
+            type:Number
+        },
+        statusText:{
+            type:String
+        },
+        headers:[Headers]
+    },
+    serverIPAddress:{
+        type: String
+    },
+    startedDateTime:{
+        type: Date
+    },
+    timings:{
+        wait:{
+            type:Number
+        }
+    }
+    
 });
-
-const Request = new Schema({
-    method:{type:String, enum:['GET', 'POST', 'PUT', 'PATCH', 'DELETE']},
-    url:{type:String},
-    //headers:{type:Headers}
-});
-
-const Response = new Schema({
-    status:{type:Number},
-    statusText:{type:String},
-    //headers:{type:Headers}
-});
-
-/*const Headers = new Schema({
-    content-type:,
-    cache-control:,
-    pragma:,
-    expires:,
-    age:,
-    last-modified:,
-    host:
-});*/
-
 const Object = new Schema({
-    entries:[Entries],
-    timings: {type:Timings},
-    request:{type: Request},
-    response:{type: Response},
-    //headers:{type:Headers}
+    type:{
+        type:String,
+        enum:['Feature']
+    },
+    entries: [Entries]
 })
 
 const Objects = new Schema({
@@ -77,16 +104,13 @@ const User = new Schema({
     lastUpload: {
         type: Date,
     },
-    objects: Objects
+    objects: [Objects]
 });
 
 //Connects models with the MongoDB
 
 let user = mongoose.model('User', User);
 let entries = mongoose.model('Entries',Entries);
-let timings = mongoose.model('Timings', Timings);
-let request = mongoose.model('Request', Request);
-let response = mongoose.model('Response', Response);
 let object = mongoose.model('Object',Object);
 let objects = mongoose.model('Objects',Objects);
 
@@ -94,9 +118,6 @@ let objects = mongoose.model('Objects',Objects);
 module.exports = {
     User: user,
     Entries: entries,
-    Timings: timings,
-    Request: request,
-    Response: response,
     Object: object,
     Objects: objects
 };

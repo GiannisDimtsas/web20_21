@@ -27,12 +27,18 @@ class basicInfo extends Component {
 
         Api.countGetMethods().then(res => {
             console.log(res);
-            this.setState({getMethods: res.data})
+          
+            this.setState({getMethods: res.data[0].count})
         });
 
         Api.countPostMethods().then(res => {
             console.log(res);
-            this.setState({postMethods: res.data})
+            if(res.data.length > 1){
+                this.setState({postMethods: res.data[0].count})
+            } else {
+                this.setState({postMethods: 0})
+            }
+            
         }); 
         
         Api.getStatus().then(res => {
@@ -50,7 +56,7 @@ class basicInfo extends Component {
         
         Api.countUniqueDomains().then(res => {
             console.log(res);
-            this.setState({domains: res.data})
+            this.setState({domains: res.data.length})
         })
     }
 
